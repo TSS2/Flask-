@@ -59,11 +59,11 @@ class Awards(db.Model):
                                                 cascade="all, delete-orphan",
                                                 passive_deletes=True,
                                                 lazy='dynamic'))
-
+    #many to many Awards<-->Teacher
     teachers = db.relationship('Teacher',
                                secondary=awards_teacher,
                                backref=db.backref('awards', lazy='dynamic'))
-
+    #many to many Awards<-->Student
     students = db.relationship('Student',
                                secondary=awards_student,
                                backref=db.backref('awards', lazy='dynamic'))
@@ -90,24 +90,9 @@ def generate_next_awards_id(contest):
         last_awards_id = int(last_awards.awards_id[8:])
         new_id = str(last_awards_id + 1)
         return '%s%s' % (contest_id, new_id.rjust(3, '0'))
-'''
-add
-'''
-def get_stu_awards_list():
-    return Awards.query.join(awards_student,(awards_student.c.awards == Awards.awards_id)).all()
-
-def test():
-    return Awards.query(Awards).\
-            join(User.awards_id).\
-            join(Student.stu_no)
-            
 
 def get_by_id(id):
     return Awards.query.filter(Awards.id == id).first()
-'''
-def get_list():
-    return Awards.query()
-'''
 
 def get_list_by_contest_id(cid):
     return Awards.query.filter(Awards.contest_id == cid).all()
