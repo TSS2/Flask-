@@ -15,7 +15,7 @@ def login():
     if request.method == 'POST' and login_form.validate():
         user = User.get_by_username(login_form.username.data)
         if user is None:
-            flash(u'用户不存在')
+             flash(u'用户不存在')
         elif not user.verify_password(login_form.password.data):
             flash(u'密码错误')
         else:
@@ -567,38 +567,16 @@ def contest_plan_print():
                            year = year,
                            len = len)
 
-@admin.route('/statistics',methods=['GET'])
+@admin.route('/statistics/',methods=['GET'])
 @login_required
 def statistics():
-    page=request.args.get('page',1,type=int)
-    per_page=current_app.config['ADMIN_STATISTICS_PER_PAGE']
-    if page == -1:
-        page = ((Awards.get_count() - 1) // per_page) + 1
-    pagination = Awards.get_list_pageable(page, per_page)
-    awards_list = pagination.items
-    awards = Awards.get_stu_awards_list()
-    count = Awards.get_count()
-    student_list = Student.get_list_pageable(page,per_page).items
+    dep = {}
+    id = Contest.get_id()
+    
+
     return render_template('admin/statistics.html',
-                            title = u'统计',
-                            awards_list = awards_list,
-                            student_list = student_list,
-                            alist = awards,
-                            count = count,
-                            pagination = pagination)
-                            
-'''
-@admin.route('/statistic',methods=['GET'])
-@login_required
-def statistic():
-    page = request.args.get('page',1,type = int)
-    per_page = current_app.config['ADMIN_STATISTICS_PER_PAGE']
-    if page == -1:
-        page = ((Student.get_count() - 1) // per_page) + 1
-    pagination = Student.get_list_pageable(page,per_page)
-    student_list = pagination.items
-    return render_template('main/statistics.html',
-                            title = u'统计',
-                            student_list = student_list,
-                            pagination = pagination)
-'''
+                           title = u'统计',
+                           department = dep,
+                           id = id
+                           )
+
