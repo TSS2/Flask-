@@ -571,6 +571,7 @@ def contest_plan_print():
 @login_required
 def statistics():
     id = Contest.get_id()
+    #
     return render_template('admin/statistics.html',
                            title = u'统计',
                            id = id
