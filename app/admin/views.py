@@ -570,13 +570,9 @@ def contest_plan_print():
 @admin.route('/statistics/',methods=['GET'])
 @login_required
 def statistics():
-    dep = {}
     id = Contest.get_id()
-    
-
     return render_template('admin/statistics.html',
                            title = u'统计',
-                           department = dep,
                            id = id
                            )
 
