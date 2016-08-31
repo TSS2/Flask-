@@ -18,12 +18,12 @@
         </div>
         <div class="box-body no-padding">
           <div class="list-box-controls">
-            <form class="form-inline" method="get"
-                  style="display: inline-block;">
+           {# <form class="form-inline" method="get"
+                  style="display: inline-block;">#}
               <div class="form-group form-group-sm">
                 <div class="input-group">
                   <label for="chooseYear" class="input-group-addon">年份</label>
-                  <select class="form-control" id="chooseYear" name="year">
+                  <select class="form-control" id="chooseYear" name="year" style="width: 80px;">
                     {% for year in year_select %}
                       {% if year == cur_year %}
                         <option value="{{ year }}" selected>{{ year }}</option>
@@ -32,10 +32,11 @@
                       {% endif %}
                     {% endfor %}
                   </select>
+                  <button type="" class="btn btn-sm btn-default" id="selectYear">确定</button>
                 </div>
               </div>
-              <button type="submit" class="btn btn-sm btn-default">确定</button>
-            </form>
+
+{#            </form>#}
           </div>
           <table class="table table-bordered awards-table table-condensed">
             <thead>
@@ -44,7 +45,6 @@
               <th width="20%">竞赛全称<br>（以竞赛文件为准）</th>
               <th width="15%">主办单位<br>（承办单位）</th>
               <th width="7%">竞赛级别</th>
-              <th width="8%">面向专业</th>
               <th width="15%">时间、地点</th>
               <th width="15%">计划参赛情况</th>
               <th width="15%">经费预算<br>（含简要说明）</th>
@@ -57,13 +57,14 @@
               </tr>
             {% else %}
               {% for contest in contest_list %}
+               {% if contest.year == cur_year %}
                 <tr id="contest{{ contest.id }}">
                   <td>{{ loop.index }}</td>
                   <td>{{ contest.name_cn }}</td>
                   <td>{{ contest.organizer }}
                       <br>{{ contest.co_organizer or '' }}</td>
-                  <td>{{ contest.level }}</td>
-                  <td>{{ contest.subject or '' }}</td>
+                  <td>{{ contest.level_name }}</td>
+
                   <td>{{ contest.start_date.strftime('%Y/%m/%d') }}
                     <br> - {{ contest.end_date.strftime('%Y/%m/%d') }}
                     <br>{{ contest.place }}
@@ -73,6 +74,7 @@
                   <td>预算：{{ contest.budget or '' }}
                     <br>说明：{{ contest.budget_text or '' }}</td>
                 </tr>
+               {% endif %}
               {% endfor %}
             {% endif %}
             </tbody>
@@ -89,5 +91,12 @@
 {% endblock %}
 
 {% block script %}
-
+<script>
+    $(document).ready(function(){
+        $('#selectYear').click(function(){
+            var year = $('#chooseYear').val();
+            window.location.href = '{{ url_for('admin.contest_plan_config_print',year='') }}'+year;
+        });
+    });
+</script>
 {% endblock %}

@@ -24,113 +24,152 @@
         <div class="box-header with-border">
           <h3 class="box-title"><i class="fa fa-pencil"></i> 统计</h3>
         </div>
-        <div class="box-body no-padding">
-          <div class="list-box-controls">
-              {{ pagination_widget(pagination, '.student', 'pagination-sm') }}
-            </div>
-          </div>
-          <table class="table table-bordered table-striped table-condensed" style="text-align: center">
-            <thead><tr>
-              <th width="10%">学号</th>
-              <th class="col-name">姓名</th>
-              <th>院系</th>
-              <th>专业年级</th>
-			  <th>奖项</th>
-              <th width="20%">操作</th>
-			  
-            </tr></thead>
-            <tbody>
-            {% if not awards_list %}
-              <tr><td colspan="5"><h2>当前无竞赛信息</h2></td></tr>
-            {% else %}
-			{% for student in alist %}
-			<!--<tr id="student">{{ student.level }}</tr>-->
-			<td class="col-name"><b>{{ student.name }}</b></td>
-              <td class="col-name">{{ student.awards or '' }}</td>
-              <td>{{ student.department or '' }}</td>
-              <td>{{ student.major or '' }}
-                {{ student.grade + '级' if student.grade else '' }}</td>
-				<td>{{ student.level }}</td>
-				<td>
-                <div class="btn-group btn-group-sm">
-                  <a class="btn btn-default btn-sm" href="">
-                    <i class="fa fa-pencil-square-o"></i> 修改
-                  </a>
-                  <a class="btn btn-default btn-sm to_delete_item"  data-item="{{ student.id }}"
-                     data-toggle="modal" data-target="#delModal"> <i class="fa fa-trash-o"></i> 删除
-                  </a>
-                </div>
-              </td>
-              </tr>
-			  {% endfor %}
-            {% endif %}
-            
-			</tbody>
-		</table>	
-		  	<div id = "pieInfo" class = "info">饼图</div>
-			<div id = "histogramInfo" class = "info">直方图</div>
-
-			<div id = "back"></div>
-			<div id="small">
-			<div class = "title"></div>
-			<div id="container" style="min-width:700px;height:400px"></div>
+			<div id="small" class="charts">
+			    <div id="container" style="min-width:500px;height:350px"></div>
+			</div >
+			<div id="awardNumber" class="charts">
+                <div id="container2" style="min-width:500px;height:350px"></div>
 			</div>
-			<div id="awardNumber">
-			<div class = "title"></div>
-			<div id="container2" style="min-width:700px;height:400px"></div>
-			</div>
-			
-			
-        </div>
-
       </div>
     </div>
-
+  <div>
+  {% for k in counter %}
+      {{ k }}
+  {% endfor %}
+{#  {{ counter_level }}#}
   </div>
-
-<div class="modal fade" id="delModal" tabindex="-1"
-     role="dialog" aria-labelledby="mySmallModalLabel">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title text-center" id="myModalLabel">警告</h4>
-      </div>
-      <div class="modal-body">
-        <h4>确定删除选定学生</h4>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-danger del-item">确认</button>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block script %}
-  <script>
-    $(document).ready(function() {
-      $('.to_delete_item').on('click', function() {
-        var id = $(this).data('item');
-        $('.del-item').data('student', id);
-      });
-      $('.del-item').on('click', function() {
-        var url = "{{ url_for('admin.student_del') }}";
-        var id = $(this).data('student');
-        var data = { 'student_id' : id };
-        $('#delModal').modal('hide');
-        $.post(url, data, function(response) {
-          if (response.ret == 'OK') {
-            $('#student' + id).fadeOut(1200, function(){ $(this).remove(); });
-          } else {
-            $('#alert-msg').html(response.ret);
-            $('.alert-danger').fadeIn();
-          }
-        });
-      });
+{#<script src="{{ url_for('static', filename='JS/jquery-2.1.4.js') }}"></script>#}
+<script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/highcharts.js') }}"></script>
+<script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/modules/exporting.js') }}"></script>
+<script>
+    $(function () {
+        $('#container').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotBorderWidth: null,
+            plotShadow: false
+        },
+        credits:{
+            enabled:false, // 禁用版权信息
+        },
+        title: {
+            text: '各学院学生参加竞赛比例'
+        },
+        subtitle: {
+            text: '————教务处统计',
+            align:'right',
+        },
+        //数据提示框
+        tooltip: {
+    	    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        //标示线
+        plotOptions: {
+            pie: {
+                allowPointSelect: true, //使数据可以选择
+                dashStyle:'longdashdot', //标示线的样式，默认是solid（实线），这里定义为长虚线
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    color: '#000000',
+                    connectorColor: '#000000',
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                }
+            }
+        },
+        //数据列
+        series: [{
+            type: 'pie',
+            name: '比例',
+            data: [
+                {% set j = 0 %}
+                {%  for department in counter %}
+                    ['{{ department }}',   {{ counter[department] }} ],
+                    {% set j = j + 1 %}
+                {% endfor %}
+            ]
+        }]
 
     });
-  </script>
+});
+</script>
+<script>
+    $(function () {
+        $('#container2').highcharts({
+        chart: {
+            type: 'column'
+        },
+        credits:{
+            enabled:false, // 禁用版权信息
+        },
+        title: {
+            text: '各学院获奖人数（分等级）',
+        },
+        subtitle: {
+            text: '————教务处统计',
+            align:'right',
+        },
+        xAxis: {
+            categories: [
+                {% set j = 0 %}
+                {%  for num in counter %}
+                    '{{ num }}',
+                    {% set j = j + 1 %}
+                {% endfor %}
+            ]
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '获奖人数 (人)'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y} 人</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true       //开启 HTML 模式后，就可以给提示框添加 链接、图片、表格等 HTML 元素
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0,
+                dataLabels:{
+                    enabled:true,
+                    style:{
+                        color:'black',
+                    },
+                },
+            },
+        },
+{#       series: [{#}
+{#            name: '一等奖项',#}
+{#            data: [5, 6, 4]#}
+{##}
+{#        }, {#}
+{#            name: '二等奖项',#}
+{#            data: [12, 9, 16]#}
+{##}
+{#        }, {#}
+{#            name: '三等奖项',#}
+{#            data: [20, 33, 39]#}
+{##}
+{#        }]#}
+         series: [
+             {% for l in level %}
+            {
+            name: '{{ l }}',
+            data: [5, 6, 1]
+            },
+            {% endfor %}
+         ]
+        });
+        chart = $('#container2').highcharts();
+    });
+</script>
 {% endblock %}

@@ -11,6 +11,7 @@ class Permission:
     NORMAL = u'录入信息'
     COLLEGE = u'学院申报'
     DEAN = u'教务处审批'
+    SUPER = u'超级用户'
 
 PermissionList = [u'学院申报', u'教务处审批']
 
@@ -81,7 +82,7 @@ def create_user(user_form):
         has_user = get_by_username(user_form.username.data)
         if has_user:
             current_app.logger.warning(u'用户 %s 已存在', has_user.username)
-            return u"该用户名已经存在"
+            return 'REPEAT'
         user = User(user_form.username.data)
         user.password = user_form.password.data
         user.department = user_form.department.data

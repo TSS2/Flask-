@@ -53,7 +53,7 @@
       <th width="175px">竞赛全称</th>
       <th width="130px">主办单位<br>（承办单位）</th>
       <th width="70px">竞赛级别</th>
-      <th width="70px">面向专业</th>
+{#      <th width="70px">面向专业</th>#}
       <th width="140px">时间、地点</th>
       <th width="130px">计划参赛情况</th>
       <th width="130px">经费预算<br>（含简要说明）</th>
@@ -66,13 +66,14 @@
       </tr>
     {% else %}
       {% for contest in contest_list %}
+       {% if contest.year == year %}
         <tr id="contest{{ contest.id }}">
           <td class="tr-index">{{ loop.index }}</td>
           <td>{{ contest.name_cn }}</td>
           <td>{{ contest.organizer }}
             <br>{{ contest.co_organizer or '' }}</td>
-          <td>{{ contest.level }}</td>
-          <td>{{ contest.subject or '' }}</td>
+          <td>{{ contest.result }}</td>
+{#          <td>{{ contest.subject or '' }}</td>#}
           <td>{{ contest.start_date.strftime('%Y/%m/%d') }}
              - {{ contest.end_date.strftime('%m/%d') }}
             <br>{{ contest.place }}
@@ -83,6 +84,7 @@
           <td><div>预算：{{ contest.budget or '' }}
             <br>说明：{{ contest.budget_text or '' }}</div></td>
         </tr>
+       {% endif %}
       {% endfor %}
       {% for i in range(len(contest_list) + 1, 9) %}
         <tr>
@@ -90,7 +92,7 @@
           <td></td><td></td>
           <td></td><td></td>
           <td></td><td></td>
-          <td></td>
+{#          <td></td>#}
         </tr>
       {% endfor %}
     {% endif %}

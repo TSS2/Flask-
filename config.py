@@ -30,8 +30,10 @@ class Config:
     ADMIN_CONTEST_PER_PAGE = 10
     ADMIN_AWARDS_PER_PAGE = 10
     ADMIN_APPLY_PER_PAGE = 4
-    ADMIN_STATISTICS_PER_PAGE = 4    
-
+    ADMIN_STATISTICS_PER_PAGE = 4
+    ADMIN_CONTESTLEVEL_PER_PAGE = 10
+    ADMIN_AWARDSLEVEL_PER_PAGE = 10
+    ADMIN_RESULT_PER_PAGE = 10
 
 class DevConfig(Config):
     DEBUG = True
@@ -48,12 +50,15 @@ class DouConfig(Config):
 
 class HrConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://sa:sq5292016@114.215.119.20/db?charset=utf8'
+    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://sa:sq5292016@114.215.119.20/Project?charset=utf8'
 
 class SaConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://sa:SQL201509@localhost:1433/Project?charset=utf8'
 
+class RjConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'mssql+pymssql://jstd:rjgcxy2016@210.41.225.108:1433/EAS?charset=utf8'
 
 config = {
     'dev': DevConfig,
@@ -61,5 +66,6 @@ config = {
     'dou':DouConfig,
     'hr':HrConfig,
     'sa': SaConfig,
-    'default': DevConfig
+    'default': DevConfig,
+    'rj':RjConfig
 }

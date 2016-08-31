@@ -7,6 +7,7 @@ from . import db, Resource
 class ContestSeries(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Unicode(256), unique=True, nullable=False)
+    budget_text = db.Column(db.Unicode(2048))
 
     def __repr__(self):
         return '<ContestSeries %s>' % self.name
@@ -49,6 +50,7 @@ def create_series(series_form):
             return 'FAIL'
         series = ContestSeries()
         series.name = series_form.name.data
+        series.budget_text = series_form.budget_text.data
         series.save()
         current_app.logger.info(u'录入竞赛系列 %s 成功', series.name)
         return 'OK'
@@ -61,11 +63,12 @@ def create_series(series_form):
 def update_series(series, series_form):
     try:
         series.name = series_form.name.data
+        series.budget_text = series_form.budget_text.data
         series.save()
         current_app.logger.info(u'更新竞赛系列 %s 成功', series.name)
         return 'OK'
     except Exception, e:
-        current_app.logger.error(u'更新竞赛系列 %s 失败', series_form.username.data)
+        current_app.logger.error(u'更新竞赛系列 %s 失败', series_form.name.data)
         current_app.logger.error(e)
         return 'FAIL'
 

@@ -13,6 +13,7 @@ function showdiv(id) {
 	document.getElementById("back").style.display = "block";
 	if(id == "pieInfo"){
 		document.getElementById("small").style.display = "block";
+
 	}else if(id == "histogramInfo"){
 		document.getElementById("awardNumber").style.display = "block";
 	}

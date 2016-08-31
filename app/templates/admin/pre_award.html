@@ -26,12 +26,12 @@
               <label class="btn btn-default btn-sm">
                 <input type="radio" name="filter_pass" value="0" autocomplete="off"> 所有
               </label>
-              <label class="btn btn-default btn-sm">
-                <input type="radio" name="filter_pass" value="1" autocomplete="off"> 未定档
-              </label>
-              <label class="btn btn-default btn-sm">
-                <input type="radio" name="filter_pass" value="-1" autocomplete="off"> 已定档
-              </label>
+{#              <label class="btn btn-default btn-sm">#}
+{#                <input type="radio" name="filter_pass" value="1" autocomplete="off"> 未审核1#}
+{#              </label>#}
+{#              <label class="btn btn-default btn-sm">#}
+{#                <input type="radio" name="filter_pass" value="-1" autocomplete="off"> 已审核#}
+{#              </label>#}
             </div>
             <div class="pull-right">
               {{ pagination_widget(pagination, '.contest', 'pagination-sm') }}
@@ -54,20 +54,28 @@
               <td><b>{{ contest.name_cn }}</b></td>
               <td>
                 {% if not contest.is_pass %}
-                <label class="label label-danger">{{ '未定档' }}</label>
+                <label class="label label-danger">{{ '未审核' }}</label>
                 {% else %}
                   <label class="label label-success">{{ contest.result }}</label>
                 {% endif %}
               </td>
-              <td>{{ contest.level }}</td>
+              <td>{{ contest.level_name }}</td>
               <td>{{ contest.organizer }}</td>
               <td>
                 <div class="btn-group btn-group-sm">
-                  <a class="btn btn-default btn-flat btn-sm" target="_blank"
-                       href="{{ url_for('admin.awards_add', id=contest.id) }}">添加奖项</a>
-                  <a class="btn btn-default btn-flat btn-sm" target="_blank"
-                       href="{{ url_for('admin.awards', id=contest.id) }}">编辑奖项</a>
-
+                    {% if contest.result and department %}
+                         <a class="btn btn-default btn-flat btn-sm" target="_blank"
+                         href="{{ url_for('admin.awards_add', id=contest.id) }}">添加奖项</a>
+                         <a class="btn btn-default btn-flat btn-sm" target="_blank"
+                         href="{{ url_for('admin.awards', id=contest.id) }}">查看奖项</a>
+{#                        <a class="btn btn-default btn-flat btn-sm" target="_blank"#}
+{#                         href="{{ url_for('admin.awards', id=contest.id) }}">查看奖项</a>#}
+                    {% elif not department and contest.result %}
+                         <a class="btn btn-default btn-flat btn-sm" target="_blank"
+                         href="{{ url_for('admin.awards', id=contest.id) }}">查看奖项</a>
+                    {% else %}
+                        <label class="label label-danger">未审核</label>
+                    {% endif %}
                 </div>
 
               </td>

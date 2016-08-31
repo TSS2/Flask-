@@ -2,6 +2,7 @@
 import traceback
 from flask import current_app
 from . import db
+from sqlalchemy import or_
 
 
 class Student(db.Model):
@@ -24,6 +25,14 @@ class Student(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def to_json(self):
+        return {
+            'id': self.id,
+            'stu_no':self.stu_no,
+            'name': self.name,
+            'department': self.department
+        }
+
 
 def get_by_id(id):
     return Student.query.filter(Student.id == id).first()
@@ -37,6 +46,16 @@ def get_by_stu_no(stu_no):
 
 def get_all():
     return Student.query.all()
+#
+# 获取参加竞赛学生列表
+#
+#
+def get_all_list(keyword=None):
+    query = Student.query
+    if keyword:
+        keyword = '%' + keyword + '%'
+        query = query.filter(or_(Student.stu_no.like(keyword),Student.department.like(keyword)))
+    return query.all()
 
 
 def get_count():

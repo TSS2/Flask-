@@ -3,7 +3,7 @@ from flask import Flask
 from config import config
 from app.models import db
 from app.models import User, ContestSeries, Contest, Awards, \
-    Student, Teacher, Resource
+    Student, Teacher, Resource,ContestLevel,AwardsLevel,ContestResult
 
 if __name__ == "__main__":
     app = Flask(__name__)
@@ -14,6 +14,6 @@ if __name__ == "__main__":
         db.create_all()
         user = User.User(u'admin')
         user.password = 'admin'
-        user.department = u'教务处'
-        user.permission = User.Permission.DEAN
+        user.department = u'超级用户'
+        user.permission = User.Permission.SUPER
         user.save()

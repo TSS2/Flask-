@@ -2,69 +2,8 @@
 	margin: 0px;
 	padding: 0px;
 }
-#small{
-	width: 800px;
-	height: 500px;
-	border-radius: 5px; 
-	display: none;  
-	position: fixed;  
-	top: 10%;  
-	left: 22%;   
-	padding: 8px;  
-	border: 8px solid #E8E9F7;  
-	background-color: white; 
-	z-index:1002;  
-	overflow: auto;
-}
-#awardNumber{
-    width: 800px;
-    height: 500px;
-    border-radius: 5px; 
-    display: none;  
-    position: fixed;  
-    top: 10%;  
-    left: 22%;   
-    padding: 8px;  
-    border: 8px solid #E8E9F7;  
-    background-color: white; 
-    z-index:1002;  
-    overflow: auto;
-}
-#back{
-    display: none; 
-    position: fixed;  
-    top: 0%;  
-    left: 0%;  
-    width: 100%;  
-    height: 100%;  
-    background-color: black;  
-    z-index:1001;  
-    -moz-opacity: 0.7;  
-    opacity:.70;  
-    filter: alpha(opacity=70);
-}
-.info{
-	width: 100px;
-    height: 30px;
-    border: 1px solid #F36262;
-    border-radius: 5px;
-    background-color: #F36262;
-    cursor: pointer;
-    float: left;
-    margin-left: 10px;
-    margin-top: 10px;
-    text-align: -webkit-center;
-    line-height: 30px;
-    color: white;
-}  
-.info:hover{
-    background-color: red;
-}
-.title{
-	width: 30px;
-    height: 30px;
-    background-image: url(../IMG/close.png);
-    background-repeat: no-repeat;
-    margin-left:730px;
-    cursor: pointer;
+.charts{
+    width: 100%;
+    margin-top: 20px;
+    border-top: 5px solid #223077;
 }

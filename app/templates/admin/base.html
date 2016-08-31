@@ -55,28 +55,37 @@
         {% if current_user.level == 1 %}
           <li class="header">计划管理</li>
           <li><a href="{{ url_for('admin.contest_add') }}"><i class="fa fa-plus"></i> <span>添加竞赛计划</span></a></li>
-          <li><a href="{{ url_for('admin.contest') }}"><i class="fa fa-flag"></i> <span>竞赛编辑</span></a></li>
+          <li><a href="{{ url_for('admin.contest') }}"><i class="fa fa-flag"></i> <span>竞赛计划管理</span></a></li>
           <li><a href="{{ url_for('admin.contest_plan_config_print') }}"><i class="fa fa-print"></i> <span>打印竞赛计划表</span></a></li>
           <li class="header">奖项管理</li>
-          <li><a href="{{ url_for('admin.pre_award') }}"><i class="fa fa-pencil"></i> <span>奖项管理</span></a></li>
+          <li><a href="{{ url_for('admin.pre_award') }}"><i class="fa fa-pencil"></i> <span>奖项添加</span></a></li>
           <li class="header">人员管理</li>
           <li><a href="{{ url_for('admin.teacher') }}"><i class="fa fa-graduation-cap"></i> <span>指导教师</span></a></li>
           <li><a href="{{ url_for('admin.student') }}"><i class="fa fa-bicycle"></i> <span>学生</span></a></li>
           <li class="header">统计</li>
-        {% else %}
+        {% endif %}
+        {% if current_user.level != 1 and current_user.username != 'admin' %}
           <li class="header">计划管理</li>
           <li><a href="{{ url_for('admin.contest',filter_pass=1) }}"><i class="fa fa-flag"></i> <span>竞赛审核</span></a></li>
           <li class="header">奖项管理</li>
-          <li><a href="{{ url_for('admin.pre_award') }}"><i class="fa fa-pencil"></i> <span>奖项管理</span></a></li>
+          <li><a href="{{ url_for('admin.pre_award') }}"><i class="fa fa-pencil"></i> <span>奖项审核</span></a></li>
           <li class="header">系统设置</li>
           <li><a href="{{ url_for('admin.series') }}"><i class="fa fa-leaf"></i> <span>竞赛系列管理</span></a></li>
-          <li><a href="{{ url_for('admin.user') }}"><i class="fa fa-users"></i> <span>账号管理</span></a></li>
-          <li class="header">人员管理</li>
-          <li><a href="{{ url_for('admin.student') }}"><i class="fa fa-bicycle"></i> <span>学生管理</span></a></li>
-          <li><a href="{{ url_for('admin.teacher') }}"><i class="fa fa-graduation-cap"></i> <span>教师管理</span></a></li>
+          <li><a href="{{ url_for('admin.result') }}"><i class="fa fa-tasks"></i> <span>竞赛档次设置</span></a></li>
+          <li><a href="{{ url_for('admin.contest_level') }}"><i class="fa fa-tasks"></i> <span>竞赛等级设置</span></a></li>
+          <li><a href="{{ url_for('admin.awards_level') }}"><i class="fa fa-tasks"></i> <span>奖项等级设置</span></a></li>
+{#          <li class="header">人员管理</li>#}
+{#          <li><a href="{{ url_for('admin.student') }}"><i class="fa fa-bicycle"></i> <span>学生管理</span></a></li>#}
+{#          <li><a href="{{ url_for('admin.teacher') }}"><i class="fa fa-graduation-cap"></i> <span>教师管理</span></a></li>#}
           <li class="header">统计</li>
 		  <li><a href="{{ url_for('admin.statistics') }}"><i class="fa fa-pencil"></i>_<span>统计</span></a></li>
+{#          <li><a href="{{ url_for('admin.statistics_form') }}"><i class="fa fa-pencil"></i>_<span>测试</span></a></li>#}
+          <li><a href="{{ url_for('admin.statistics_form_1',filter_pass=0) }}"><i class="fa fa-pencil"></i>_<span>测试1</span></a></li>
+          <li><a href="{{ url_for('admin.statistics_form_2',filter_pass=0) }}"><i class="fa fa-pencil"></i>_<span>测试2</span></a></li>
   		  {% endif %}
+          {% if current_user.username == 'admin' %}
+          <li><a href="{{ url_for('admin.user') }}"><i class="fa fa-users"></i> <span>账号管理</span></a></li>
+          {% endif %}
       </ul>
     </section>
   </div>
@@ -102,12 +111,6 @@
 <script src="{{ url_for('static', filename='plugins/fastclick/fastclick.min.js') }}"></script>
 <script src="{{ url_for('static', filename='plugins/slimScroll/jquery.slimscroll.min.js') }}"></script>
 <script src="{{ url_for('static', filename='scripts/admin.js') }}"></script>
-<script src="{{ url_for('static', filename='JS/jquery-2.1.4.js') }}"></script>
-<script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/highcharts.js') }}"></script>
-<script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/modules/exporting.js') }}"></script>
-<script src="{{ url_for('static', filename='JS/initialize.js') }}"></script>
-<script src="{{ url_for('static', filename='JS/awardNumber.js') }}"></script>
-<script src="{{ url_for('static', filename='JS/chartInfo.js') }}"></script>
 <script>
   $(document).ready(function() {
     gaoActiveLink('.sidebar-menu > li > a');
@@ -116,5 +119,3 @@
 {%- block script -%}{%- endblock -%}
 </body>
 </html>
-
-

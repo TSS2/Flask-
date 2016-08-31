@@ -39,6 +39,8 @@ def get_by_name(name):
 def get_list_by_name(name):
     return Teacher.query.filter(Teacher.name == name).all()
 
+def get_all():
+    return Teacher.query.all()
 
 def is_exist(name, department):
     has = Teacher.query.filter(Teacher.name == name

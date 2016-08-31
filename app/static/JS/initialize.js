@@ -6,7 +6,7 @@ $(function () {
             plotShadow: false
         },
         credits:{
-            enabled:false, // 禁用版权信息
+            enabled:false // 禁用版权信息
         },
         title: {
             text: '各学院学生参加过竞赛比例'
@@ -16,7 +16,7 @@ $(function () {
             align:'right',
         },
         //数据提示框
-        tooltip: {                                  
+        tooltip: {
     	    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
         },
         //标示线
@@ -38,7 +38,7 @@ $(function () {
             type: 'pie',
             name: '比例',
             data: [
-                ['软件工程学院', 45.0],
+                ['软件工程学院',45.0],
                 ['通信工程学院',26.8],
                 {
                     name: '大气学院',

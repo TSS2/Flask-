@@ -9,7 +9,7 @@
   <div class="row">
     <div class="col-sm-12">
       <ol class="breadcrumb">
-        <li><a href="{{ url_for('admin.series') }}">竞赛系列管理</a></li>
+        <li><a href="{{ url_for('admin.awards_level') }}">奖项等级管理</a></li>
         <li class="active">{{ title }}</li>
       </ol>
     </div>
@@ -25,9 +25,9 @@
         </div>
         <form action="{{ action }}" method="post" class="form-horizontal">
           <div class="box-body">
-            {{ series_form.hidden_tag() }}
-            {{ render_form_field(series_form.name, id='inputSeriesName') }}
-            {{ render_form_field(series_form.budget_text, id='inputBudgetText',rows='3') }}
+            {{ awards_form.hidden_tag() }}
+            {{ render_form_field(awards_form.name, id='inputSeriesName') }}
+            {{ render_form_field(awards_form.budget_text, id='inputBudgetText',rows='3') }}
             <div class="row">
               <div class="col-sm-offset-2 col-sm-9">
                 {%- with messages = get_flashed_messages() -%}
