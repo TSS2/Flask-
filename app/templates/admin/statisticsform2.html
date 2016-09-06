@@ -1,6 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block head %}
+
 {% endblock %}
 
 {% block content %}
@@ -16,11 +17,16 @@
   <div class="row">
     <div class="col-md-12">
       <div class="box box-primary">
+{#  统计图 #}
+{#        <div id="container2" style="min-width:700px;height:400px"></div>#}
+
         <div class="box-header with-border">
           <h3 class="box-title"><i class="fa fa-flag"></i>
             <b style="color: #3c8dbc;">[{{ cur_year }} 年度]</b>
             奖项统计表</h3>
         </div>
+
+
         <div class="box-body no-padding">
           <div class="list-box-controls">
             <div class="btn-group" data-toggle="buttons">
@@ -50,6 +56,11 @@
                   <button type="" class="btn btn-sm btn-default" id="selectYear">确定</button>
                 </div>
               </div>
+            {#  统计图 #}
+            {% if not awards_num %}
+            {% else %}
+            <div id="container2" style="min-width:700px;height:400px"></div>
+            {% endif %}
             </div>
         </div>
          <div style="padding-right: 17px;padding-left: 13px;margin-right: auto;margin-left: auto;">
@@ -77,6 +88,7 @@
 				<thead>
 					<tr>
 						<th></th>
+                        {#  所有 #}
                         {% if filter_pass == -1 %}
                          {% for l in list %}
                              {% for n in awards_level %}
@@ -86,6 +98,7 @@
                         {% endfor %}
                         {% endfor %}
                         {% endif %}
+                        {# 分等级 #}
                         {% for l in level_list %}
                         {% if filter_pass == level_list.index(l) %}
                            {% for n in awards_level %}
@@ -122,6 +135,28 @@
 					</tr>
                     {% set i = i + 1 %}
                 {% endfor %}
+                    <tr>
+                        <td style="font-size: large;text-align: center">总计</td>
+                        {% if filter_pass == -1 %}
+                        {% for l in list %}
+                        {% for a in awards_level %}
+                        {% if l in a %}
+                            <td style="font-size: large;text-align: center">{{ level_sum[a] }}</td>
+                        {% endif %}
+                        {% endfor %}
+                        {% endfor %}
+                        {% endif %}
+
+                        {% for l in level_list %}
+                        {% if filter_pass == level_list.index(l) %}
+                        {% for a in awards_level %}
+                        {% if l in a %}
+                            <td style="font-size: large;text-align: center">{{ level_sum[a] }}</td>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
 				</tbody>
                 {% endif %}
 			</table>
@@ -151,8 +186,8 @@
 {#          var year = '{{ cur_year }}';#}
           var $selected = $('input[name="filter_pass"]:checked');
           window.location.href = '{{ url_for('admin.statistics_form_2', filter_pass='') }}' + $selected.val()+'&year='+year;
-
       });
+
     }
 
     $(document).ready(function() {
@@ -162,5 +197,148 @@
             window.location.href = '{{ url_for('admin.statistics_form_2',year='' ) }}'+year+'&filter_pass=' + filter_pass;
         });
     });
+  </script>
+
+{#      <script type="text/javascript" src="http://cdn.hcharts.cn/jquery/jquery-1.8.3.min.js"></script>#}
+{#  <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/highcharts.js"></script>#}
+    <script src="{{ url_for('static', filename='JS/highcharts.js') }}"></script>
+{#  <script type="text/javascript" src="http://cdn.hcharts.cn/highcharts/exporting.js"></script>#}
+  <script>
+  $(function () {
+    $('#container2').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: '奖项统计表(分学院)'
+        },
+        subtitle: {
+            text: '来源：教务处'
+        },
+        xAxis: [{
+            categories: [
+                    {% for d in department %}
+                        '{{ d }}',
+                    {% endfor %}
+                '全校'
+            ]
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}人',
+                style: {
+                    color: '#89A54E'
+                }
+            },
+            title: {
+                text: '获奖人数',
+                style: {
+                    color: '#89A54E'
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: '获奖次数',
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            labels: {
+                format: '{value} 次',
+                style: {
+                    color: '#4572A7'
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true
+        },
+{#        legend: {#}
+{#            layout: 'vertical',#}
+{#            align: 'left',#}
+{#            x: 120,#}
+{#            verticalAlign: 'top',#}
+{#            y: 100,#}
+{#            floating: true,#}
+{#            backgroundColor: '#FFFFFF'#}
+{#        },#}
+        series: [
+            {# 所有 #}
+            {% if filter_pass == -1 %}
+            {% set i = 0 %}
+            {% for l in list %}
+            {% for a in awards_level %}
+            {% if l in a %}
+            {
+            name: '{{ a }}',
+{#            color: '#4572A7',#}
+            type: 'column',
+            yAxis: 1,
+            data: [
+{#                    {% for n in range(department_len) %}#}
+{#                    {{ awards_num[n*list_len + i] }},#}
+{#                    {% endfor %}#}
+                    {% for i in dicts[a] %}
+                    {{ i }},
+                    {% endfor %}
+                    {{ level_sum[a] }}
+            ],
+            tooltip: {
+                valueSuffix: ' 次'
+            }
+            },
+            {% endif %}
+            {% set i = i + 1 %}
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+            {# 分等级 #}
+            {% for l in level_list %}
+            {% if filter_pass == level_list.index(l) %}
+            {% for a in awards_level %}
+            {% if l in a %}
+
+            {
+            name: '{{ a }}',
+{#            color: '#4572A7',#}
+            type: 'column',
+            yAxis: 1,
+            data: [
+                {% for i in dicts[a] %}
+                    {{ i }},
+                {% endfor %}
+                {{ level_sum[a] }}
+            ],
+            tooltip: {
+                valueSuffix: ' 次'
+            }
+            },
+
+            {% endif %}
+            {% endfor %}
+            {% endif %}
+            {% endfor %}
+
+            {% for i in range(5) %}
+            {
+            name: '等级{{ i }}',
+{#            color: '#89A54E',#}
+            type: 'spline',
+            data: [
+                {% for n in range(3) %}
+                    {{ n + i }},
+                {% endfor %}
+            ],
+            tooltip: {
+                valueSuffix: '人'
+            }
+            },
+            {% endfor %}
+        ]
+    });
+      chat = $('#container2').highcharts();
+});
+
   </script>
 {% endblock %}

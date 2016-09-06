@@ -79,7 +79,7 @@ def create_level(level_form):
         current_app.logger.info(u'录入竞赛等级 %s 成功', level.name)
         return 'OK'
     except Exception, e:
-        current_app.logger.error(u'录入竞赛等级 %s 失败', level_form.username.data)
+        current_app.logger.error(u'录入竞赛等级 %s 失败', level_form.name.data)
         current_app.logger.error(e)
         return 'FAIL'
 
@@ -92,7 +92,7 @@ def update_level(level, level_form):
         current_app.logger.info(u'更新竞赛系列 %s 成功', level.name)
         return 'OK'
     except Exception, e:
-        current_app.logger.error(u'更新竞赛系列 %s 失败', level_form.username.data)
+        current_app.logger.error(u'更新竞赛系列 %s 失败', level_form.name.data)
         current_app.logger.error(e)
         return 'FAIL'
 

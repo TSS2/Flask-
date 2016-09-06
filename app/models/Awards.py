@@ -46,6 +46,7 @@ class Awards(db.Model):
     apply = db.Column(db.Integer)
     department = db.Column(db.Unicode(128))
     year = db.Column(db.Unicode(128))
+    awards_num = db.Column(db.Unicode(128))
     contest_id = db.Column(db.String(128),
                            db.ForeignKey('contest.contest_id', ondelete='CASCADE',
                                          onupdate='CASCADE'), nullable=False)
@@ -108,6 +109,34 @@ def get_level_by_level():
             if l.name == a:
                 levels.append(l.name)
     return levels
+def get_student_num(year,level_selected):
+    awards = Awards.query.filter(Awards.year == year).all()
+    level = AwardsLevel.get_all()
+    dicts = {}
+    if level_selected == u'所有':
+        for l in level:
+            for a in awards:
+                if l.name == a.level:
+                    if not l in dicts:
+                        dicts.setdefault(l.name)
+                        print l.name
+                        num = {}
+                        for a in awards:
+                            if not a in num:
+                                print a.department
+                                num.setdefault(a.department)
+                                num[a.department] = 2
+    else:
+        for l in level:
+            if level_selected in l.name:
+                if not l in dicts:
+                    dicts.setdefault(l.name)
+                    num = {}
+                    for a in awards:
+                        if not a in num and a.awards_num:
+                            num.setdefault(a.department)
+                            num[a.department] = 2
+    return dicts
 
 def get_awards_num(level_selected):
     from datetime import date
@@ -159,13 +188,11 @@ def get_awards_num2(year,level_selected):
                 for a in awards:
                     if l.name == a.level and not l.name in level_list:
                         level_list.append(l.name)
-                        print l.name
         for d in department:
             for l in level_list:
                 number = 0
                 for a in awards:
-                    if str(a.level) == str(l) and str(a.department) == str(d) and int(a.year) == int(year):
-                        print "555555555555555555"
+                    if a.level == l and a.department == d and int(a.year) == int(year):
                         number = number + 1
                 list.append(number)
     else:
@@ -177,11 +204,45 @@ def get_awards_num2(year,level_selected):
             for l in level_list:
                 number = 0
                 for a in awards:
-                    if str(a.level) == str(l) and str(a.department) == str(d) and int(a.year) == int(year):
+                    if a.level == l and a.department == d and int(a.year) == int(year):
                         number = number + 1
                 list.append(number)
     return list
 
+#等级为主键，五年内获奖次数为值的字典
+def get_awards_num3(level_selected):
+    from datetime import date
+    year_now = date.today().year
+    year = [str(year) for year in range(year_now-4,year_now+1)]
+    awards = Awards.query.all()
+    level = AwardsLevel.get_all()
+    list = {}
+    level_list = []
+    for l in level:
+        for a in awards:
+            if level_selected in a.level:
+                if l.name == a.level and not l.name in level_list:
+                    level_list.append(l.name)
+            if level_selected == u'所有':
+                if l.name == a.level and not l.name in level_list:
+                    level_list.append(l.name)
+
+    for l in level_list:
+        num = []
+        for y in year:
+            number = 0
+            for a in awards:
+                if l == a.level:
+                    list.setdefault(l)
+                    if y == a.year:
+                        number = number + 1
+            num.append(number)
+        list[l] = num
+    return list
+
+#得到获奖学生人数
+def awards_students_num():
+    pass
 def get_level_by_year():
     awards = Awards.query.all()
     i = 0
@@ -298,6 +359,7 @@ def create_awards(awards_form, contest, files):
         # if awards.teachers == []:
         #     return 'notTch'
         awards.students = awards_form.get_student_list()
+        awards.awards_num = len(awards_form.get_student_list())
         # if awards.students == []:
         #
         #     return 'notStu'
@@ -321,6 +383,7 @@ def update_awards(awards, awards_form, files):
         awards.type = awards_form.type.data
         awards.teachers = awards_form.get_teacher_list()
         awards.students = awards_form.get_student_list()
+        awards.awards_num = len(awards_form.get_student_list())
         awards.apply = 6
         awards.process = u'待审核'
         awards.save()

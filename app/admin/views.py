@@ -9,57 +9,24 @@ from . import admin
 from .forms import LoginForm, AddUserForm, EditUserForm, ContestSeriesForm, \
     TeacherForm, ContestForm, AwardsForm, StudentForm,ContestLevelForm,AwardsLevelForm,ContestResultForm
 from app.models import User, ContestSeries, Teacher, Contest, Awards, Student, \
-    Resource,ContestLevel,AwardsLevel,ContestResult
+    Resource,ContestLevel,AwardsLevel,ContestResult, UIA
 from collections import Counter
-
+from app import DepartmentLists
 
 @admin.route('/login', methods=['GET', 'POST'])
 def login():
     login_form = LoginForm()
+    uia=UIA.uia()
     if request.method == 'POST' and login_form.validate():
 
         # 此处进行学生身份统一认证
         if login_form.username.data.isdigit() and len(login_form.username.data) == 10:
-            user_info = "xh=" + login_form.username.data + "&" + "password=" + login_form.password.data
-            r = requests.post("http://bysj.cuit.edu.cn:8098/Interface/TaoRan_Interface.svc/CheckUserPassword",
-                              data=user_info)
-            r.encoding = 'utf-8'
-            s = r.text
-            strl = ''
-            for x in s[1:]:
-                strl += x
-            login_status = eval(strl)
-            print login_status["code"]
-            if login_status["code"] == '1000':
-                # login_user(login_status["code"], remember=login_form.remember_me.data)
-                user_info1 = "xh=" + login_form.username.data
-                j = requests.post("http://bysj.cuit.edu.cn:8098/Interface/TaoRan_Interface.svc/GetUserInfo",
-                                  data=user_info1)
-                j.encoding = 'utf-8'
-                d = j.text
-
-                # 将接受到的字符转化为字符串
-                strs = ''
-                for x in d[1:]:
-                    strs += x
-
-                # 再将字符串字典化
-                stu_status = eval(strs)
-
-                # 以下是为了解决子字典转化为字符串后再转化为独立字典时遇到的
-                # 错误：UnicodeDecodeError: 'ascii' codec can't decode byte 0xe7 in position 0: ordinal not in range(128)
-                reload(sys)
-                sys.setdefaultencoding('utf8')
-                # 解决结束
-
-                # 字符串化和字典化
-                strda = str(stu_status["data"])
-                stu_data = eval(strda)
-
+            tag = uia.authentication(login_form.username.data, login_form.password.data)
+            if tag == 'success':
+                info = uia.get_student_info(login_form.username.data)
                 return render_template('admin/ShowInfo.html',
-                                       r=s,
-                                       j=stu_status,
-                                       f=stu_data)
+                                       r=tag,
+                                       f=info)
             else:
                 flash(u'用户名或密码错误！')
 
@@ -72,7 +39,10 @@ def login():
                 flash(u'密码错误')
             else:
                 login_user(user, remember=login_form.remember_me.data)
-                return redirect(url_for('admin.contest'))
+                if user.username == 'admin':
+                    return redirect(url_for('admin.user'))
+                else:
+                    return redirect(url_for('admin.contest'))
     return render_template('login.html',
                            login_form=login_form)
 
@@ -102,7 +72,7 @@ def user():
     pagination = User.get_list_pageable(page, per_page)
     user_list = pagination.items
     return render_template('admin/user.html',
-                           title = u'用户管理',
+                           title = u'超级用户',
                            user_list = user_list,
                            pagination = pagination)
 
@@ -912,6 +882,7 @@ def awards_add(id):
             flash(u'提交失败')
         else:
             flash(ret)
+    # Student.remove_student()
     return render_template('admin/awards_form.html',
                            title = u'奖项录入',
                            contest = contest,
@@ -1102,13 +1073,16 @@ def resource_del():
 @login_required
 def stu_Find():
     stu_id = request.form.get('stu_id', -1)
+    uia = UIA.uia()
     if stu_id != -1:
-        stu = Student.get_by_stu_no(stu_id)
-        current_app.logger.info(stu)
-        if stu is None:
-            ret = 'FAIL'
+        if len(stu_id) != 0:
+            stu = uia.nopass_authen(stu_id)
+            if stu is 'false':
+                ret = 'FAIL'
+            else:
+                ret = 'OK'
         else:
-            ret = 'OK'
+            ret = 'FALL'
     else:
         ret = 'FAIL'
     return jsonify(ret = ret)
@@ -1211,7 +1185,7 @@ def statistics_form():
 @admin.route('/statistics_form_1/',methods=['GET'])
 @login_required
 def statistics_form_1():
-    filter_pass = request.args.get('filter_pass', -1, type=int)
+    filter_pass = request.args.get('filter_pass', 0, type=int)
     list = [u'球',u'国家',u'省',u'市',u'校']
     from datetime import date
     year_now = date.today().year
@@ -1219,23 +1193,34 @@ def statistics_form_1():
     awards_level = Awards.get_level_by_level()
     level_list = []
     number = []
-    for l in list:
-        for a in awards_level:
-            if l in a and not l in level_list:
-                level_list.append(l)
-    if filter_pass != -1:
-        level_selected = level_list[filter_pass]
-    else:
-        level_selected = u'所有'
-        for l in level_list:
-            n = 0
+    if awards_level:
+        for l in list:
             for a in awards_level:
-                if l in a:
-                    n = n + 1
-            number.append(n)
-    awards_num = Awards.get_awards_num(level_selected)
-    list_len = len(awards_num) / 5
-
+                if l in a and not l in level_list:
+                    level_list.append(l)
+        if filter_pass != -1:
+            level_selected = level_list[filter_pass]
+        else:
+            level_selected = u'所有'
+            for l in level_list:
+                n = 0
+                for a in awards_level:
+                    if l in a:
+                        n = n + 1
+                number.append(n)
+        awards_num = Awards.get_awards_num(level_selected)
+        list_len = len(awards_num) / 5
+        chart_list = Awards.get_awards_num3(level_selected)
+        #求和
+        level_sum = {}
+        for c in chart_list:
+            level_sum.setdefault(c)
+            level_sum[c] = sum(chart_list[c])
+    else:
+        awards_num = 0
+        list_len = 0
+        chart_list = []
+        level_sum = 0
     return render_template('admin/statisticsform1.html',
                            title = u'统计',
                            filter_pass = filter_pass,
@@ -1245,7 +1230,9 @@ def statistics_form_1():
                            awards_num = awards_num,
                            level_list = level_list,
                            list_len = list_len,
-                           number = number
+                           number = number,
+                           chart_list = chart_list,
+                           level_sum = level_sum
                            )
 
 
@@ -1253,44 +1240,79 @@ def statistics_form_1():
 @login_required
 def statistics_form_2():
     filter_pass = request.args.get('filter_pass', 0, type=int)
-    print "%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
-    print filter_pass
     list = [u'球',u'国家',u'省',u'市',u'校']
     from datetime import date
     year_now = date.today().year
     year_select = [str(year) for year in range(year_now-4,year_now+1)]
     cur_year = request.args.get('year', year_now, type=int) #获取连接里面的参数的值。year的值
-    print "#####################"
-    print cur_year
     awards_level = Awards.get_level_by_level()
-    # 得到国家级省级...
-    level_list = []
-    number = []
-    for l in list:
-        for a in awards_level:
-            if l in a and not l in level_list:
-                level_list.append(l)
 
-    if filter_pass != -1:
-        level_selected = level_list[filter_pass]
-    else:
-        level_selected = u'所有'
-        for l in level_list:
-            n = 0
+    # 得到国家级省级...
+    if awards_level:
+        level_list = []
+        number = []
+        for l in list:
             for a in awards_level:
-                if l in a:
-                    n = n + 1
-            number.append(n)
-    print level_selected
-    print cur_year
-    awards_num = Awards.get_awards_num2(cur_year,level_selected)
-    department = []
-    ad = Awards.get_all()
-    for d in ad:
-        if not d.department in department:
-            department.append(d.department)
-    list_len = len(awards_num) / len(department)
-    print awards_num
+                if l in a and not l in level_list:
+                    level_list.append(l)
+
+        if filter_pass != -1:
+            level_selected = level_list[filter_pass]
+        else:
+            level_selected = u'所有'
+            for l in level_list:
+                n = 0
+                for a in awards_level:
+                    if l in a:
+                        n = n + 1
+                number.append(n)
+        awards_num = Awards.get_awards_num2(cur_year,level_selected)
+        department = []
+        ad = Awards.get_all()
+        for d in ad:
+            if not d.department in department:
+                department.append(d.department)
+        list_len = len(awards_num) / len(department)
+
+        dicts = {}
+        level_sum = {}
+        y = 0
+        if filter_pass != -1:
+            for a in awards_level:
+                if level_selected in a:
+                    dicts.setdefault(a)
+                    level_sum.setdefault(a)
+                    dicts_list = []
+                    x = y
+                    while x < len(awards_num):
+                        dicts_list.append(awards_num[x])
+                        x = x + list_len
+                    dicts[a] = dicts_list
+                    level_sum[a] = sum(dicts_list)
+                    y = y + 1
+        else:
+            for a in awards_level:
+                dicts.setdefault(a)
+                level_sum.setdefault(a)
+                dicts_list = []
+                x = y
+                while x < len(awards_num):
+                    dicts_list.append(awards_num[x])
+                    x = x + list_len
+                dicts[a] = dicts_list
+                level_sum[a] = sum(dicts_list)
+                y = y + 1
+        d = Awards.get_student_num(cur_year,level_selected)
+        print d
+    else:
+        awards_num = 0
+        level_list = []
+        list_len = 0
+        department = []
+        number = []
+        dicts = {}
+        level_sum = 0
+
     return render_template('admin/statisticsform2.html',
                            title = u'统计',
                            filter_pass = filter_pass,
@@ -1302,5 +1324,7 @@ def statistics_form_2():
                            list_len = list_len,
                            cur_year = cur_year,
                            department = department,
-                           number = number
+                           number = number,
+                           dicts = dicts,
+                           level_sum = level_sum
                            )

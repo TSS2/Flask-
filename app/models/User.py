@@ -99,7 +99,7 @@ def create_user(user_form):
 def update_user(user, user_form):
     try:
         user.username = user_form.username.data
-        user.password = user_form.password.data
+        user.password = user_form.password2.data
         user.department = user_form.department.data
         user.permission = user_form.permission.data
         user.save()

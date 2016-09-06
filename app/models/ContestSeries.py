@@ -55,7 +55,7 @@ def create_series(series_form):
         current_app.logger.info(u'录入竞赛系列 %s 成功', series.name)
         return 'OK'
     except Exception, e:
-        current_app.logger.error(u'录入竞赛系列 %s 失败', series_form.username.data)
+        current_app.logger.error(u'录入竞赛系列 %s 失败', series_form.name.data)
         current_app.logger.error(e)
         return 'FAIL'
 

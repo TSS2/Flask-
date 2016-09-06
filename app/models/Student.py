@@ -3,6 +3,7 @@ import traceback
 from flask import current_app
 from . import db
 from sqlalchemy import or_
+from app import DepartmentLists
 
 
 class Student(db.Model):
@@ -40,8 +41,19 @@ def get_by_id(id):
 add
 '''
 
+
 def get_by_stu_no(stu_no):
     return Student.query.filter(Student.stu_no == stu_no).first()
+
+
+def get_by_stu_post(stu_no, stu_dict):
+    sname = str(stu_dict["XM"]).decode("utf-8")
+    smajor = str(stu_dict["ZY"]).decode("utf-8")
+    departmentlist=DepartmentLists.departmentlist()
+    for d in departmentlist:
+        if smajor in departmentlist[d]:
+            department = d
+    return Student(stu_no=stu_no, name=sname, department=department, major=smajor, grade=stu_no[:4])
 
 
 def get_all():
@@ -115,3 +127,11 @@ def delete_student(student):
         current_app.logger.error(u'删除学生失败')
         current_app.logger.error(traceback.format_exc())
         return 'FAIL'
+
+def remove_student():
+    student = Student.query.all()
+    try:
+        for stu in student:
+            stu.delete()
+    except Exception:
+        current_app.logger.error(traceback.format_exc())

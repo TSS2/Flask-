@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %}
 
 {% block head %}
+{#    HighChart统计图#}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/admin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/iCheck/square/blue.css') }}"/>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/chart.css')}}"/>
 {% endblock %}
 
 {% block content %}
@@ -16,6 +20,11 @@
   <div class="row">
     <div class="col-md-12">
       <div class="box box-primary">
+        {#      HighChart统计图    #}
+{#        <div id="awardNumber" class="charts">#}
+{#            <div id="container2" style="min-width:500px;height:350px"></div>#}
+{#	    </div>#}
+
         <div class="box-header with-border">
           <h3 class="box-title"><i class="fa fa-flag"></i>
             <b style="color: #3c8dbc;">
@@ -29,7 +38,6 @@
             </b>
             奖项统计表</h3>
         </div>
-
         <div class="box-body no-padding">
           <div class="list-box-controls">
             <div class="btn-group" data-toggle="buttons">
@@ -44,6 +52,13 @@
               {% endfor %}
             </div>
           </div>
+            {#      HighChart统计图    #}
+        {% if not awards_num %}
+        {% else %}
+        <div id="awardNumber" class="charts">
+            <div id="container2" style="min-width:500px;height:350px"></div>
+	    </div>
+        {% endif %}
          <div style="padding-right: 17px;padding-left: 13px;margin-right: auto;margin-left: auto;">
 	<div class="row clearfix">
 		<div class="col-md-12 column">
@@ -59,7 +74,7 @@
                          <th colspan={{ list_len }}>{{ l }}{{ '级奖项统计表' }}</th>
                          {% endif %}
                          {% if filter_pass == -1 %}
-                             <th colspan={{ number[level_list.index(l)] }}>{{ l }}{{ '级奖项统计表' }}</th>
+                          <th colspan={{ number[level_list.index(l)] }}>{{ l }}{{ '级奖项统计表' }}</th>
                          {% endif %}
                      {% endfor %}
 
@@ -70,7 +85,7 @@
 						<th></th>
                         {% if filter_pass == -1 %}
                          {% for l in list %}
-                             {% for n in awards_level %}
+                         {% for n in awards_level %}
                             {% if l in n %}
 						    <th>{{ n }}</th>
                             {% endif %}
@@ -114,6 +129,41 @@
 					</tr>
                     {% set i = i + 1 %}
                 {% endfor %}
+                <tr>
+                    <td style="font-size: large;font-weight:900;text-align: center">总计</td>
+                    {% if filter_pass == -1 %}
+                    {% for l in list %}
+                    {% for n in awards_level %}
+                    {% if l in n %}
+                        <td style="font-size: larger;font-weight:900;text-align: center">{{ level_sum[n] }}</td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% for l in level_list %}
+                    {% if filter_pass == level_list.index(l) %}
+                    {% for n in awards_level %}
+                    {% if l in n %}
+                        <td style="font-size: larger;font-weight:900;text-align: center">{{ level_sum[n] }}</td>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                    {% endfor %}
+{#                    {% if filter_pass == -1 %}#}
+{#                    {% for c in chart_list %}#}
+{#                        {% set m = 0 %}#}
+{#                        {% set i = 0 %}#}
+{#                        {% for n in chart_list[c] %}#}
+{#                            {% set m = n + m %}#}
+{#                            {% set i = i + 1 %}#}
+{#                            {% if i == 4 %}#}
+{#                            <td style="font-size: larger;font-weight:900;text-align: center">{{ m }}</td>#}
+{#                            {% endif %}#}
+{#                        {% endfor %}#}
+{#                    {% endfor %}#}
+{#                    {% endif %}#}
+                </tr>
 				</tbody>
                 {% endif %}
 			</table>
@@ -121,12 +171,15 @@
 	</div>
     </div>
         </div>
+
       </div>
     </div>
   </div>
 {% endblock %}
 
 {% block script %}
+    <script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/highcharts.js') }}"></script>
+    <script src="{{ url_for('static', filename='jslib/Highcharts-4.2.5/js/modules/exporting.js') }}"></script>
   <script>
     var filter_pass = '{{ filter_pass }}';
 
@@ -150,4 +203,74 @@
 
     });
   </script>
+
+  <script>
+    $(function () {
+        $('#container2').highcharts({
+        chart: {
+            type: 'column'
+        },
+        credits:{
+            enabled:false, // 禁用版权信息
+        },
+        title: {
+            text: '近五年获奖次数（分等级）',
+        },
+        subtitle: {
+            text: '————教务处统计',
+            align:'right',
+        },
+        xAxis: {
+            categories: [
+{#                {% set j = 0 %}#}
+                {%  for y in year_select %}
+                    '{{ y }}',
+{#                    {% set j = j + 1 %}#}
+                {% endfor %}
+                '总计'
+            ]
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: '获奖人数 (次)'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y} 次</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true       //开启 HTML 模式后，就可以给提示框添加 链接、图片、表格等 HTML 元素
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0,
+                dataLabels:{
+                    enabled:true,
+                    style:{
+                        color:'black',
+                    },
+                },
+            },
+        },
+         series: [
+             {% for a in chart_list %}
+            {
+            name: '{{ a }}',
+            data: [
+                {% for n in chart_list[a] %}
+                    {{ n }},
+                {% endfor %}
+                {{ level_sum[a] }}
+            ]
+            },
+            {% endfor %}
+         ]
+        });
+        chart = $('#container2').highcharts();
+    });
+</script>
 {% endblock %}

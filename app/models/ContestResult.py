@@ -97,7 +97,7 @@ def update_result(result, result_form):
         current_app.logger.info(u'更新竞赛系列 %s 成功', result.name)
         return 'OK'
     except Exception, e:
-        current_app.logger.error(u'更新竞赛系列 %s 失败', result_form.username.data)
+        current_app.logger.error(u'更新竞赛系列 %s 失败', result_form.name.data)
         current_app.logger.error(e)
         return 'FAIL'
 

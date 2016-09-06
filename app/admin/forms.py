@@ -8,7 +8,7 @@ from wtforms.validators import Length, Optional, EqualTo, ValidationError,DataRe
 from ..utils.validators import MyDataRequired,MyDataRequired1
 from wtforms.widgets import TextInput
 from app import DepartmentList
-from app.models import User, Contest, ContestSeries, Awards, Student, Teacher,ContestLevel
+from app.models import User, Contest, ContestSeries, Awards, Student, Teacher,ContestLevel,UIA
 
 
 class LoginForm(Form):
@@ -220,12 +220,17 @@ class AwardsForm(Form):
 
     def get_student_list(self):
         students = []
+        uia = UIA.uia()
         for item in self.students.data:
             if item == '':
                 continue
             has_t = Student.get_by_stu_no(item)
             if has_t is not None:
                 students.append(has_t)
+            else:
+                stu_info = uia.get_student_info(item)
+                stu = Student.get_by_stu_post(item, stu_info)
+                students.append(stu)
         return students
 
     def validate_students(form, field):
